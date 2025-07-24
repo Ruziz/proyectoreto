@@ -2,6 +2,11 @@ package EduData.controller;
 
 import EduData.entity.Estudiante;
 import EduData.service.EstudianteServicio;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +20,34 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/health")
 @CrossOrigin(origins = "*")
+@Tag(name = "Sistema", description = "Endpoints de diagnóstico y administración del sistema")
 public class HealthController {
 
     @Autowired(required = false)
     private EstudianteServicio estudianteServicio;
 
     @GetMapping
+    @Operation(
+        summary = "Verificar estado del sistema",
+        description = "Endpoint de health check para verificar que el backend está funcionando correctamente. No requiere autenticación."
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "Sistema funcionando correctamente",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(
+                example = """
+                {
+                    "status": "OK",
+                    "message": "Backend is running correctly",
+                    "timestamp": 1703123456789,
+                    "server": "Spring Boot"
+                }
+                """
+            )
+        )
+    )
     public Map<String, Object> healthCheck() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "OK");
@@ -31,6 +58,35 @@ public class HealthController {
     }
 
     @GetMapping("/init-data")
+    @Operation(
+        summary = "Inicializar datos de prueba",
+        description = """
+            Crea datos de muestra en el sistema para propósitos de testing y desarrollo.
+            
+            ### Datos creados:
+            - 3 estudiantes de ejemplo con información básica
+            - Identificaciones numéricas válidas
+            - Correos electrónicos únicos
+            
+            ### Nota:
+            Este endpoint es seguro de ejecutar múltiples veces ya que ignora errores de duplicados.
+            """
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "Resultado de la inicialización de datos",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(
+                example = """
+                {
+                    "status": "SUCCESS",
+                    "message": "Datos de prueba creados correctamente"
+                }
+                """
+            )
+        )
+    )
     public Map<String, Object> initializeData() {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -53,6 +109,10 @@ public class HealthController {
         return response;
     }
 
+    /**
+     * Método privado para crear estudiantes de ejemplo
+     * Ignora errores si el estudiante ya existe
+     */
     private void createSampleStudent(String identificacion, String nombre, String apellido, String correo) {
         try {
             Estudiante estudiante = new Estudiante();
