@@ -40,7 +40,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/setup/**").permitAll()
                         .requestMatchers("/api/health").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Swagger/OpenAPI rutas públicas
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // Rutas que requieren autenticación
                         .requestMatchers("/api/estudiantes/**").hasAnyRole("ADMIN", "DOCENTE", "INVITADO")
                         .requestMatchers("/api/docentes/**").hasAnyRole("ADMIN", "DOCENTE")

@@ -270,7 +270,7 @@ export default function CursoForm() {
                                 className="btn-secondary"
                                 onClick={() => setFiltroNombre("")}
                             >
-                                Limpiar Filtro
+                                Limpiar
                             </button>
                         </div>
                     </div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
-import { authService } from "../services/authService";
 
 export default function EstudianteForm() {
     const [estudiantes, setEstudiantes] = useState([]);
@@ -95,63 +94,26 @@ export default function EstudianteForm() {
         setMostrarFormulario(false);
     };
 
-    // Función para manejar cambios en los inputs del formulario
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        
+        // Validación especial para identificación
+        if (name === 'identificacion') {
+            // Solo permitir números y máximo 10 dígitos
+            const soloNumeros = value.replace(/\D/g, '');
+            const maxDigitos = soloNumeros.slice(0, 10);
+            setEstudiante(prev => ({
+                ...prev,
+                [name]: maxDigitos
+            }));
+            return;
+        }
+        
         setEstudiante(prev => ({
             ...prev,
             [name]: value
         }));
     };
-
-    // Funciones para descargar PDF
-    const descargarPDFTodos = async () => {
-        try {
-            const response = await api.get('/estudiantes/pdf', {
-                responseType: 'blob'
-            });
-            
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'estudiantes.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error al descargar PDF:', error);
-            alert('Error al descargar el PDF');
-        }
-    };
-
-    const descargarPDFIndividual = async (id) => {
-        try {
-            const response = await api.get(`/estudiantes/${id}/pdf`, {
-                responseType: 'blob'
-            });
-            
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `estudiante_${id}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error al descargar PDF:', error);
-            alert('Error al descargar el PDF');
-        }
-    };
-
-    const handleLogout = () => {
-        authService.logout();
-    };
-
-    const currentUser = authService.getCurrentUser();
 
     // Filtrar estudiantes
     const estudiantesFiltrados = estudiantes.filter(e => {
@@ -165,23 +127,13 @@ export default function EstudianteForm() {
     return (
         <div className="dashboard">
             <header className="dashboard-header">
-                <div className="header-title">
-                    <h1>Gestión de Estudiantes</h1>
-                    <p>Administra los estudiantes del sistema educativo</p>
-                </div>
-                <div className="header-user">
-                    {currentUser && (
-                        <span>Bienvenido, {currentUser.username} ({currentUser.role})</span>
-                    )}
-                    <button onClick={handleLogout} className="btn-logout">
-                        Cerrar Sesión
-                    </button>
-                </div>
+                <h1>Gestión de Estudiantes</h1>
+                <p>Administra los estudiantes del sistema educativo</p>
                 <nav>
                     <Link to="/">Inicio</Link>
                     <Link to="/estudiantes" className="active">Estudiantes</Link>
-                    <Link to="/docentes">Docentes</Link>
                     <Link to="/cursos">Cursos</Link>
+                    <Link to="/docentes">Docentes</Link>
                     <Link to="/matriculas">Matrículas</Link>
                     <Link to="/asistencias">Asistencias</Link>
                     <Link to="/calificaciones">Calificaciones</Link>
@@ -199,13 +151,6 @@ export default function EstudianteForm() {
                             >
                                 {mostrarFormulario ? "Cancelar" : "Nuevo Estudiante"}
                             </button>
-                            <button 
-                                className="btn-pdf"
-                                onClick={descargarPDFTodos}
-                                title="Descargar PDF de todos los estudiantes"
-                            >
-                                📄 PDF Todos
-                            </button>
                         </div>
                     </div>
 
@@ -222,8 +167,14 @@ export default function EstudianteForm() {
                                     value={estudiante.identificacion}
                                     onChange={handleInputChange}
                                     required
-                                    placeholder="Ej: 12345678"
+                                    placeholder="Máximo 10 dígitos"
+                                    pattern="[0-9]{1,10}"
+                                    title="Solo se permiten números, máximo 10 dígitos"
+                                    maxLength="10"
                                 />
+                                <small style={{color: '#666', fontSize: '12px'}}>
+                                    Solo números, máximo 10 dígitos ({estudiante.identificacion.length}/10)
+                                </small>
                             </div>
 
                             <div className="form-group">
@@ -387,13 +338,6 @@ export default function EstudianteForm() {
                                                 className="btn-delete"
                                             >
                                                 Eliminar
-                                            </button>
-                                            <button 
-                                                onClick={() => descargarPDFIndividual(e.id)}
-                                                className="btn-pdf"
-                                                title="Descargar PDF del estudiante"
-                                            >
-                                                📄
                                             </button>
                                         </td>
                                     </tr>

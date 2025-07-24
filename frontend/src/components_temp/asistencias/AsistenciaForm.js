@@ -268,7 +268,7 @@ export default function AsistenciaForm() {
                                     setFiltroMatricula("");
                                 }}
                             >
-                                Limpiar Filtros
+                                Limpiar
                             </button>
                         </div>
                     </div>

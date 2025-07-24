@@ -299,7 +299,7 @@ export default function CalificacionForm() {
                                     setFiltroMatricula("");
                                 }}
                             >
-                                Limpiar Filtros
+                                Limpiar
                             </button>
                         </div>
 
